@@ -2,17 +2,21 @@ import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import generateGridGraph from "./generateGridGraph";
 import BFSAlgo from "./BFSAlgo";
-import DFSAlgo from './DFSAlgo';
+import DFSAlgo from "./DFSAlgo";
+import Wheel from "@uiw/react-color-wheel";
+import { hsvaToHex } from "@uiw/color-convert";
 
-const GRID_SIZE = 10; 
-const CELL_SIZE = 60; 
+const GRID_SIZE = 10;
+const CELL_SIZE = 60;
 
 const DisplayGrid = () => {
   const [graph, setGraph] = useState(null);
   const [showGrid, setShowGrid] = useState(false);
   const [gridAnimation, setGridAnimation] = useState({});
-  const animationIntervalRef = useRef(null); 
-  const sequenceRef = useRef([]); 
+  const animationIntervalRef = useRef(null);
+  const sequenceRef = useRef([]);
+  const [hsva, setHsva] = useState({ h: 214, s: 43, v: 90, a: 1 });
+  const [cellColor, setCellColor] = useState(hsvaToHex(hsva));
 
   const handleGenerateGrid = () => {
     const newGraph = generateGridGraph(GRID_SIZE);
@@ -32,7 +36,7 @@ const DisplayGrid = () => {
   };
 
   const animateGrid = () => {
-    resetAnimation(); 
+    resetAnimation();
     let animationIndex = 0;
     animationIntervalRef.current = setInterval(() => {
       if (animationIndex < sequenceRef.current.length) {
@@ -41,7 +45,7 @@ const DisplayGrid = () => {
         setGridAnimation((prevAnimationProps) => ({
           ...prevAnimationProps,
           [cellKey]: {
-            fill: "blue",
+            fill: cellColor,
           },
         }));
         animationIndex++;
@@ -52,9 +56,9 @@ const DisplayGrid = () => {
   };
 
   const stopAnimation = () => {
-    clearInterval(animationIntervalRef.current); 
-    setGridAnimation({}); 
-    sequenceRef.current = []; 
+    clearInterval(animationIntervalRef.current);
+    setGridAnimation({});
+    sequenceRef.current = [];
   };
 
   const resetAnimation = () => {
@@ -68,8 +72,18 @@ const DisplayGrid = () => {
       <button onClick={runBFSAlgorithm} disabled={!showGrid}>
         Run BFS
       </button>
-      <button onClick={runDFSAlgorithm} >dfs</button>
+      <button onClick={runDFSAlgorithm}>dfs</button>
       <button onClick={stopAnimation}>Stop</button>
+      <Wheel
+        color={hsva}
+        onChange={(color) => {
+          setHsva({ ...hsva, ...color.hsva });
+
+          const hexColor = hsvaToHex({ ...hsva, ...color.hsva });
+
+          setCellColor(hexColor);
+        }}
+      />
 
       {showGrid && graph && (
         <div>
